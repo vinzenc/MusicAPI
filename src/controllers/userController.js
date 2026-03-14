@@ -49,7 +49,7 @@ export const addUser = async (req, res) => {
             success: true,
             message: "Tạo user thành công!",
             data: newUser
-        });
+        })
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
