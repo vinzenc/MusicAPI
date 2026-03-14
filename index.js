@@ -15,7 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 // 3. SỬA LỖI 404: Thêm tiền tố '/api' để khớp với đường dẫn bên frontend
-app.use('/api/users', userRoutes);
+app.use('/users', userRoutes);
 
 // Server chạy backend
 app.listen(PORT, () => {
