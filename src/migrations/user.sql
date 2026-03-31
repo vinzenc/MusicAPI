@@ -1,14 +1,11 @@
 -- 1. Tạo bảng users nếu chưa có
-CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL
+Create table users (
+    id Int auto_increment primary key,
+    name nvarchar(100) not null,
+    email varchar(255) not null unique,
+    password varchar(255) not null,
+    role Enum('admin', 'user','collaborator') default 'user',
+    created_at timestamp default current_timestamp
 );
-
--- 2. Chèn 6 dữ liệu mẫu vào bảng
-INSERT INTO users (name) VALUES 
-('Trần Ái Quốc'),
-('Trương Minh Thắng'),
-('Phan Lực Vinh'),
-('Châu Thanh Thuận'),
-('Đặng Võ Quốc Trọng'),
-('Nguyễn Đình Phước');
+-- 2. Tài khoản admin mặc định
+Insert into users (name, email, password, role) values ('Admin', 'admin@example.com', 'admin123', 'admin');

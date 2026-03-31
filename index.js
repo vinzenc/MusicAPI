@@ -1,7 +1,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import cors from 'cors'; // 1. Import thêm cors
+import cors from 'cors'; 
 import userRoutes from './src/routes/userRoutes.js';
+import authRoutes from './src/routes/authRouters.js';
 
 dotenv.config();
 const app = express();
@@ -13,7 +14,7 @@ app.use(express.json());
 
 //API routes
 app.use('/users', userRoutes);
-
+app.use('/auth', authRoutes);
 
 // Server chạy backend
 app.listen(PORT, () => {

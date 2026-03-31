@@ -1,38 +1,43 @@
 import fs from 'fs';
 import path from 'path';
-import pool from './src/config/db.js'; // Nhớ tạo file này trước
+import pool from './src/config/db.js';
 
-const runMigrations = async () => {
+const runMigration = async () => {
+    // Lấy đối số thứ 3 từ terminal (ví dụ: node migrate.js user.sql -> lấy chữ 'user.sql')
+    const fileName = process.argv[2];
+
+    // Kiểm tra xem đã nhập tên file chưa
+    if (!fileName) {
+        console.error("❌ Lỗi: Bạn chưa nhập tên file cần chạy!");
+        console.log("💡 Hướng dẫn: node migrate.js <tên_file.sql>");
+        process.exit(1);
+    }
+
+    // Nối đường dẫn thẳng vào thư mục src/migrations/
+    const filePath = path.join(process.cwd(), 'src', 'migrations', fileName);
+
+    // Kiểm tra file có tồn tại không
+    if (!fs.existsSync(filePath)) {
+        console.error(`❌ Lỗi: Không tìm thấy file '${fileName}' trong thư mục src/migrations/`);
+        process.exit(1);
+    }
+
     try {
-        console.log("🚀 Bắt đầu quá trình Migration...");
-
-        // 1. Đường dẫn đến thư mục chứa các file .sql
-        const migrationsDir = path.join(process.cwd(), 'src', 'migrations');
+        console.log(`⏳ Đang thực thi: ${fileName}...`);
         
-        // 2. Đọc tất cả các file trong thư mục migrations
-        const files = fs.readdirSync(migrationsDir).sort();
+        // Đọc nội dung file SQL
+        const sql = fs.readFileSync(filePath, 'utf8');
 
-        for (const file of files) {
-            if (file.endsWith('.sql')) {
-                console.log(` đang chạy file: ${file}`);
-                
-                // Đọc nội dung file SQL
-                const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf8');
-                
-                // Chạy lệnh SQL lên Aiven
-                await pool.query(sql);
-                
-                console.log(`✅ Hoàn thành: ${file}`);
-            }
-        }
+        // Chạy lệnh SQL
+        await pool.query(sql);
 
-        console.log("✨ Tất cả bảng đã được tạo thành công trên TiDB Cloud!");
+        console.log(`✅ Thành công: Đã chạy xong ${fileName}!`);
     } catch (error) {
-        console.error("❌ Lỗi Migration:", error.message);
+        console.error(`❌ Lỗi khi chạy database:`, error.message);
     } finally {
-        await pool.end();
-        process.exit();
+        // Tắt kết nối để terminal không bị treo
+        process.exit(0); 
     }
 };
 
-runMigrations();
+runMigration();
