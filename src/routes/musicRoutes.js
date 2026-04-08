@@ -1,5 +1,5 @@
 import express from 'express';
-import { searchMusic, getChartMusic, getSearchHistory, clearSearchHistory } from '../controllers/musicController.js';
+import { searchMusic, getChartMusic, getSearchHistory, clearSearchHistory, deleteHistoryItem } from '../controllers/musicController.js';
 import { verifyToken } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -12,5 +12,7 @@ router.get('/chart', getChartMusic);
 
 router.get('/history', getSearchHistory); 
 router.delete('/history', clearSearchHistory);
+
+router.delete('/history/:keyword', deleteHistoryItem);
 
 export default router;

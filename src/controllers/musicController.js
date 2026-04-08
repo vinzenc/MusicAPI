@@ -106,3 +106,19 @@ export const clearSearchHistory = async (req, res) => {
         res.status(500).json({ success: false, message: "Lỗi khi xóa lịch sử" });
     }
 };
+
+// Xử lý API xóa 1 từ khóa
+export const deleteHistoryItem = async (req, res) => {
+    try {
+        const { keyword } = req.params; // Lấy chữ "đen vâu" từ đuôi đường link
+        const affectedRows = await HistoryModel.deleteOneHistory(keyword);
+
+        if (affectedRows === 0) {
+            return res.status(404).json({ success: false, message: "Không tìm thấy từ khóa này trong lịch sử" });
+        }
+
+        res.status(200).json({ success: true, message: `Đã xóa '${keyword}' khỏi lịch sử` });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};

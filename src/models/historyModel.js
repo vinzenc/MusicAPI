@@ -21,3 +21,12 @@ export const getRecentHistory = async () => {
 export const clearAllHistory = async () => {
     await pool.query("DELETE FROM search_history");
 };
+
+// Hàm xóa một từ khóa cụ thể (VD: "đen vâu")
+export const deleteOneHistory = async (keyword) => {
+    const [result] = await pool.query(
+        "DELETE FROM search_history WHERE keyword = ?", 
+        [keyword]
+    );
+    return result.affectedRows; // Trả về số dòng bị xóa
+};
