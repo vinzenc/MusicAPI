@@ -58,7 +58,7 @@ export const register = async (name,email,hashPassword) => {
 
 // ==== ADMIN: Thay đổi role ====
 export const updateUserRole = async (id, role) => {
-    const VALID_ROLES = ['user', 'collaborator', 'admin'];
+    const VALID_ROLES = ['user', 'collaborator']; // Chỉ có 2 role hợp lệ
     if (!VALID_ROLES.includes(role)) {
         throw new Error("Role không hợp lệ");
     }
