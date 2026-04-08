@@ -22,7 +22,7 @@ export const register = async (req,res) => {
             });
         }
         const hashPassword = await bcrypt.hash(password,10);
-        const newUserId = await register(name,email,hashPassword);
+        const newUserId = await register(name, email, hashPassword);
         res.status(201).json({
             success: true,
             message: "Đăng ký thành công",
@@ -74,7 +74,7 @@ export const login = async (req,res) => {
 export const forgotPassword = async(req, res) => {
     try {
         const { email } = req.body;
-        const user = await UserModel.getUserByEmail(email);
+        const user = await getUserByEmail(email);
 
         if (!user) return res.status(404).json({ 
             success: false, 
