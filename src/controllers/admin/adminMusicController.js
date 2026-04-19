@@ -1,24 +1,9 @@
 import * as TrackModel from '../../models/trackModel.js';
 import * as PendingModel from '../../models/pendingTrackModel.js';
 
-// ─────────────────────── TRACKS CRUD ───────────────────────────
+// ─────────────────────── QUẢN LÝ TRACKS ───────────────────────────
 
-// GET /admin/tracks?search=&status=&page=&limit=
-export const getTracks = async (req, res) => {
-    try {
-        const { search = '', status = '', page = 1, limit = 20 } = req.query;
-        const result = await TrackModel.getAllTracks({
-            search, status,
-            page: parseInt(page),
-            limit: parseInt(limit)
-        });
-        res.status(200).json({ success: true, data: result.rows, total: result.total });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-};
-
-// GET /admin/tracks/:id
+// GET /admin/music/tracks/:id
 export const getTrackById = async (req, res) => {
     try {
         const track = await TrackModel.getTrackById(req.params.id);
@@ -29,7 +14,7 @@ export const getTrackById = async (req, res) => {
     }
 };
 
-// POST /admin/tracks
+// POST /admin/music/tracks
 export const addTrack = async (req, res) => {
     try {
         const { title, artist } = req.body;
@@ -43,7 +28,7 @@ export const addTrack = async (req, res) => {
     }
 };
 
-// PUT /admin/tracks/:id
+// PUT /admin/music/tracks/:id
 export const editTrack = async (req, res) => {
     try {
         const { title, artist } = req.body;
@@ -58,7 +43,7 @@ export const editTrack = async (req, res) => {
     }
 };
 
-// DELETE /admin/tracks/:id
+// DELETE /admin/music/tracks/:id
 export const removeTrack = async (req, res) => {
     try {
         const deleted = await TrackModel.deleteTrack(req.params.id);
@@ -69,9 +54,9 @@ export const removeTrack = async (req, res) => {
     }
 };
 
-// ────────────────────── PENDING TRACKS ─────────────────────────
+// ────────────────────── DUYỆT BÀI HÁT CHỜ ──────────────────────────
 
-// GET /admin/pending?status=pending|approved|rejected
+// GET /admin/music/pending?status=pending|approved|rejected
 export const getPending = async (req, res) => {
     try {
         const { status = 'pending' } = req.query;
@@ -82,7 +67,7 @@ export const getPending = async (req, res) => {
     }
 };
 
-// POST /admin/pending/:id/approve
+// POST /admin/music/pending/:id/approve
 export const approvePending = async (req, res) => {
     try {
         const newId = await PendingModel.approvePending(req.params.id);
@@ -92,7 +77,7 @@ export const approvePending = async (req, res) => {
     }
 };
 
-// POST /admin/pending/:id/reject
+// POST /admin/music/pending/:id/reject
 export const rejectPending = async (req, res) => {
     try {
         const { admin_note = '' } = req.body;
@@ -104,7 +89,7 @@ export const rejectPending = async (req, res) => {
     }
 };
 
-// DELETE /admin/pending/:id
+// DELETE /admin/music/pending/:id
 export const deletePending = async (req, res) => {
     try {
         const deleted = await PendingModel.deletePending(req.params.id);
@@ -115,7 +100,7 @@ export const deletePending = async (req, res) => {
     }
 };
 
-// GET /admin/stats
+// GET /admin/music/stats
 export const getStats = async (req, res) => {
     try {
         const trackStats = await TrackModel.getTrackStats();

@@ -1,25 +1,12 @@
-import https from 'https';
+import * as TrackModel from '../models/trackModel.js';
 import * as HistoryModel from '../models/historyModel.js';
 
-// Hàm gọi Deezer API
-function deezerGet(apiPath) {
-    return new Promise((resolve, reject) => {
-        https.get(`https://api.deezer.com${apiPath}`, res => {
-            let raw = '';
-            res.on('data', c => raw += c);
-            res.on('end', () => {
-                try { resolve(JSON.parse(raw)); } 
-                catch { reject(new Error('Lỗi parse dữ liệu Deezer')); }
-            });
-        }).on('error', reject);
-    });
-}
-
-// Tìm kiếm nhạc
+// ── TÌM KIẾM NHẠC (từ Database, không gọi API ngoài) ────────────
 export const searchMusic = async (req, res) => {
     try {
-        const { q, limit = 20 } = req.query;
+        const { q, limit = 20, page = 1 } = req.query;
 
+        // Kiểm tra từ khóa tìm kiếm
         if (!q || !q.trim()) {
             return res.status(400).json({
                 success: false,
@@ -27,62 +14,80 @@ export const searchMusic = async (req, res) => {
             });
         }
 
-        const data = await deezerGet(
-            `/search?q=${encodeURIComponent(q)}&limit=${limit}`
-        );
+        // Lấy dữ liệu từ Database
+        const { rows: trackData, total } = await TrackModel.getAllTracks({
+            search: q.trim(),
+            status: 'active',
+            page: parseInt(page) || 1,
+            limit: Math.min(parseInt(limit) || 20, 100)
+        });
 
-        // ---> ĐOẠN CODE MỚI THÊM VÀO: LƯU LỊCH SỬ <---
+        // Lưu từ khóa vào lịch sử tìm kiếm (không làm sập nếu lỗi)
         try {
             await HistoryModel.saveKeyword(q.trim());
         } catch (dbError) {
-            console.error("Lỗi khi lưu lịch sử tìm kiếm vào DB:", dbError);
-            // Dù lỗi lưu DB cũng không được làm sập chức năng trả nhạc về cho Frontend
+            console.error("⚠️ Lỗi khi lưu lịch sử tìm kiếm:", dbError);
         }
-        // ----------------------------------------------
 
+        // Trả về kết quả
         res.status(200).json({
             success: true,
             query: q,
-            total: data.total,
-            data: data.data.map(track => ({
+            total: total,
+            page: parseInt(page) || 1,
+            limit: Math.min(parseInt(limit) || 20, 100),
+            data: trackData.map(track => ({
                 id: track.id,
                 title: track.title,
-                artist: track.artist?.name,
-                album: track.album?.title,
-                cover: track.album?.cover_medium,
-                preview: track.preview,    // link nghe thử 30 giây
-                duration: track.duration
+                artist: track.artist || 'Unknown',
+                album: track.album || 'Unknown Album',
+                cover: track.cover_url || '/default-cover.jpg',
+                preview: track.preview_url || null,
+                duration: track.duration || 0,
+                genre: track.genre || ''
             }))
         });
     } catch (error) {
-        res.status(500).json({ 
-            success: false, 
-            message: error.message 
+        console.error("❌ Lỗi tìm kiếm nhạc:", error);
+        res.status(500).json({
+            success: false,
+            message: "Lỗi tìm kiếm nhạc. Vui lòng thử lại!"
         });
     }
 };
 
-// Nhạc thịnh hành
+// ── LẤY NHẠC THỊNH HÀNH (Trending Tracks) ─────────────────────────
 export const getChartMusic = async (req, res) => {
     try {
-        const data = await deezerGet('/chart/0/tracks?limit=20');
+        const limit = Math.min(parseInt(req.query.limit) || 20, 100);
 
+        // Lấy nhạc hoạt động từ Database, sắp xếp mới nhất
+        const { rows: chartTracks } = await TrackModel.getAllTracks({
+            status: 'active',
+            page: 1,
+            limit: limit
+        });
+
+        // Trả về dữ liệu
         res.status(200).json({
             success: true,
-            data: data.data.map(track => ({
+            total: chartTracks.length,
+            data: chartTracks.map(track => ({
                 id: track.id,
                 title: track.title,
-                artist: track.artist?.name,
-                album: track.album?.title,
-                cover: track.album?.cover_medium,
-                preview: track.preview,
-                duration: track.duration
+                artist: track.artist || 'Unknown',
+                album: track.album || 'Unknown Album',
+                cover: track.cover_url || '/default-cover.jpg',
+                preview: track.preview_url || null,
+                duration: track.duration || 0,
+                genre: track.genre || ''
             }))
         });
     } catch (error) {
-        res.status(500).json({ 
-            success: false, 
-            message: error.message 
+        console.error("❌ Lỗi lấy nhạc thịnh hành:", error);
+        res.status(500).json({
+            success: false,
+            message: "Lỗi lấy danh sách nhạc. Vui lòng thử lại!"
         });
     }
 };
@@ -91,9 +96,16 @@ export const getChartMusic = async (req, res) => {
 export const getSearchHistory = async (req, res) => {
     try {
         const history = await HistoryModel.getRecentHistory();
-        res.status(200).json({ success: true, data: history });
+        res.status(200).json({
+            success: true,
+            data: history
+        });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Lỗi lấy lịch sử tìm kiếm" });
+        console.error("❌ Lỗi lấy lịch sử:", error);
+        res.status(500).json({
+            success: false,
+            message: "Lỗi lấy lịch sử tìm kiếm"
+        });
     }
 };
 
@@ -101,24 +113,49 @@ export const getSearchHistory = async (req, res) => {
 export const clearSearchHistory = async (req, res) => {
     try {
         await HistoryModel.clearAllHistory();
-        res.status(200).json({ success: true, message: "Đã xóa toàn bộ lịch sử tìm kiếm" });
+        res.status(200).json({
+            success: true,
+            message: "Đã xóa toàn bộ lịch sử tìm kiếm"
+        });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Lỗi khi xóa lịch sử" });
+        console.error("❌ Lỗi xóa lịch sử:", error);
+        res.status(500).json({
+            success: false,
+            message: "Lỗi khi xóa lịch sử"
+        });
     }
 };
 
 // Xử lý API xóa 1 từ khóa
 export const deleteHistoryItem = async (req, res) => {
     try {
-        const { keyword } = req.params; // Lấy chữ "đen vâu" từ đuôi đường link
+        const { keyword } = req.params;
+
+        if (!keyword || !keyword.trim()) {
+            return res.status(400).json({
+                success: false,
+                message: "Từ khóa không hợp lệ"
+            });
+        }
+
         const affectedRows = await HistoryModel.deleteOneHistory(keyword);
 
         if (affectedRows === 0) {
-            return res.status(404).json({ success: false, message: "Không tìm thấy từ khóa này trong lịch sử" });
+            return res.status(404).json({
+                success: false,
+                message: "Không tìm thấy từ khóa này trong lịch sử"
+            });
         }
 
-        res.status(200).json({ success: true, message: `Đã xóa '${keyword}' khỏi lịch sử` });
+        res.status(200).json({
+            success: true,
+            message: `Đã xóa '${keyword}' khỏi lịch sử`
+        });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error("❌ Lỗi xóa từ khóa:", error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
     }
 };

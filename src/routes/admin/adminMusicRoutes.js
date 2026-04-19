@@ -1,6 +1,6 @@
 import express from 'express';
 import {
-    getTracks, getTrackById, addTrack, editTrack, removeTrack,
+    getTrackById,
     getPending, approvePending, rejectPending, deletePending,
     getStats
 } from '../../controllers/admin/adminMusicController.js';
@@ -11,20 +11,16 @@ const router = express.Router();
 // Tất cả route đều yêu cầu đăng nhập + là admin
 router.use(verifyToken, checkRole(['admin']));
 
-// ── Thống kê ───────────────────────────────────────────────────
-router.get('/stats', getStats);
+// ── Thống kê ───────────────────────────────────────────────────────────────────────
+router.get('/stats', getStats); // GET /admin/music/stats - Lấy thống kê
 
-// ── CRUD Tracks ────────────────────────────────────────────────
-router.get('/tracks', getTracks);         // Lấy danh sách (filter, phân trang)
-router.get('/tracks/:id', getTrackById);  // Lấy 1 track
-router.post('/tracks', addTrack);         // Thêm track
-router.put('/tracks/:id', editTrack);     // Sửa track
-router.delete('/tracks/:id', removeTrack);// Xóa track
+// ── Quản lý Tracks ──────────────────────────────────────────────────────────────────
+router.get('/tracks/:id', getTrackById);   // GET /admin/music/tracks/:id - Lấy chi tiết bài hát
 
-// ── Duyệt Pending Tracks ───────────────────────────────────────
-router.get('/pending', getPending);                    // Danh sách pending ?status=
-router.post('/pending/:id/approve', approvePending);   // Duyệt → thêm vào tracks
-router.post('/pending/:id/reject', rejectPending);     // Từ chối
-router.delete('/pending/:id', deletePending);           // Xóa hẳn
+// ── Duyệt Bài Hát Chờ ───────────────────────────────────────────────────────────────
+router.get('/pending', getPending);                    // GET /admin/music/pending - Danh sách chờ duyệt
+router.post('/pending/:id/approve', approvePending);   // POST /admin/music/pending/:id/approve - Duyệt bài
+router.post('/pending/:id/reject', rejectPending);     // POST /admin/music/pending/:id/reject - Từ chối bài
+router.delete('/pending/:id', deletePending);          // DELETE /admin/music/pending/:id - Xóa bài chờ duyệt
 
 export default router;
