@@ -85,7 +85,7 @@ export const forgotPassword = async(req, res) => {
         await sendResetEmail(email, otp);
         res.json({ success: true, message: "Mã OTP đã được gửi đến email của bạn!" });
     } catch (error) {
-        console.log("Lỗi gửi mã OTP reset mật khẩu");
+        console.log("Lỗi gửi mã OTP reset mật khẩu",error);
         res.status(500).json({
             success: false,
             message: 'Lỗi gửi mã OPT reset mật khẩu'
