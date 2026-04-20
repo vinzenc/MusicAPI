@@ -3,7 +3,6 @@ import dotenv from 'dotenv';
 import cors from 'cors'; 
 import userRoutes from './src/routes/userRoutes.js';
 import authRoutes from './src/routes/authRouters.js';
-import musicRoutes from './src/routes/musicRoutes.js';
 import profileRoutes from './src/routes/profileRoutes.js';
 
 dotenv.config();
@@ -24,7 +23,6 @@ app.get('/', (req, res) => {
 // ── API routes
 app.use('/users', userRoutes);
 app.use('/auth', authRoutes);
-app.use('/music', musicRoutes);
 app.use('/profile', profileRoutes);
 
 // Server chạy backend

@@ -3,8 +3,7 @@ import jwt from 'jsonwebtoken';
 import { getUserByEmail, registerUser } from '../models/userModel.js';
 import { sendResetEmail } from '../config/mailer.js';
 import pool from '../config/db.js';
-const JWT_SECRET = process.env.JWT_SECRET || 'jwt_secet_key_musicapp';
-
+const JWT_SECRET = process.env.JWT_SECRET;
 //Api dăng ký
 export const register = async (req,res) => {
     try {
