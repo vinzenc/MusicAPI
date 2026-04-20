@@ -6,6 +6,7 @@ dotenv.config();
 // Tạo pool (thử MySQL, fallback sang mock nếu error)
 let pool = null;
 
+// Tao pool MySQL va ping thu de xac nhan ket noi hop le.
 async function initializePool() {
     try {
         const mysqlPool = mysql.createPool({

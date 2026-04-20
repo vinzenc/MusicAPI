@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 
+// Tao transport Gmail de gui email OTP/phuc hoi mat khau.
 const tranporter = nodemailer.createTransport(
     {
         service: 'gmail',
@@ -10,7 +11,9 @@ const tranporter = nodemailer.createTransport(
     }
 );
 
+// Gui email chua ma OTP dat lai mat khau den nguoi dung.
 export const sendResetEmail = async(toEmail, otp) => {
+    // Cau hinh noi dung email gui den dia chi nhan.
     const mailOptions = {
         from: `"Music APP " <${'musicapp278@gmail.com'}>`,
         to: toEmail,

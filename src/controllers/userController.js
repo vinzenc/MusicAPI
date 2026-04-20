@@ -13,6 +13,7 @@ export const fetchUsers = async (req, res) => {
     }
 };
 
+// Lay chi tiet mot user theo id tu path param.
 export const fetchUserById = async (req, res) => {
     try {
         const { id } = req.params; // Lấy con số trên URL
@@ -78,6 +79,7 @@ export const addUser = async (req, res) => {
     }
 };
 
+// Xoa user theo id, dong thoi chan hanh vi tu xoa tai khoan dang dang nhap.
 export const deleteUser = async (req, res) => {
     try {
         const { id } = req.params; // Lấy ID từ trên đường dẫn URL xuống

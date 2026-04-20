@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import pool from './src/config/db.js';
 
+// Chay mot file migration SQL theo ten file truyen qua command line.
 const runMigration = async () => {
     // Lấy đối số thứ 3 từ terminal (ví dụ: node migrate.js user.sql -> lấy chữ 'user.sql')
     const fileName = process.argv[2];
