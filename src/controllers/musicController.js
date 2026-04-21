@@ -1,4 +1,6 @@
 import cloudinary from '../config/cloudinary.js'
+import * as HistoryModel from '../models/historyModel.js';
+
 import {
   createSong,
   deleteSong,
@@ -377,3 +379,125 @@ export async function likeSong(req, res) {
     return handleMusicError(res, err, 'Loi like bai hat')
   }
 }
+
+
+
+//  HÀM LẤY LỊCH SỬ
+export const getSearchHistory = async (req, res) => {
+    try {
+        const history = await HistoryModel.getRecentHistory();
+        res.status(200).json({
+            success: true,
+            data: history
+        });
+    } catch (error) {
+        console.error("❌ Lỗi lấy lịch sử:", error);
+        res.status(500).json({
+            success: false,
+            message: "Lỗi lấy lịch sử tìm kiếm"
+        });
+    }
+};
+
+//  HÀM XÓA LỊCH SỬ_Thang
+export const clearSearchHistory = async (req, res) => {
+    try {
+        await HistoryModel.clearAllHistory();
+        res.status(200).json({
+            success: true,
+            message: "Đã xóa toàn bộ lịch sử tìm kiếm"
+        });
+    } catch (error) {
+        console.error("❌ Lỗi xóa lịch sử:", error);
+        res.status(500).json({
+            success: false,
+            message: "Lỗi khi xóa lịch sử"
+        });
+    }
+};
+
+// Xử lý API xóa 1 từ khóa_Thang
+export const deleteHistoryItem = async (req, res) => {
+    try {
+        const { keyword } = req.params;
+
+        if (!keyword || !keyword.trim()) {
+            return res.status(400).json({
+                success: false,
+                message: "Từ khóa không hợp lệ"
+            });
+        }
+
+        const affectedRows = await HistoryModel.deleteOneHistory(keyword);
+
+        if (affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Không tìm thấy từ khóa này trong lịch sử"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `Đã xóa '${keyword}' khỏi lịch sử`
+        });
+    } catch (error) {
+        console.error("❌ Lỗi xóa từ khóa:", error);
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+
+// ──  DANH SÁCH NHẠC ──────────────────────────────
+export async function getMusicList(req, res) {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+
+    const result = await getSongs({ status: 'approved', page, limit });
+
+    return res.status(200).json({
+      success: true,
+      total: result.total,
+      page,
+      data: result.rows
+    });
+  } catch (err) {
+    return handleMusicError(res, err, 'Lỗi lấy danh sách bài hát');
+  }
+}
+
+// ── 2. TÌM KIẾM NHẠC ───────────────────────────────
+export async function searchMusic(req, res) {
+  try {
+    const { q } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+
+    if (!q || !q.trim()) {
+      return res.status(400).json({ success: false, message: "Vui lòng nhập từ khóa!" });
+    }
+
+    const result = await getSongs({ search: q.trim(), status: 'approved', page, limit });
+
+    try {
+      await HistoryModel.saveKeyword(q.trim());
+    } catch (e) {
+      console.error("Lỗi lưu lịch sử:", e);
+    }
+
+    return res.status(200).json({
+      success: true,
+      query: q,
+      total: result.total,
+      page,
+      data: result.rows
+    });
+  } catch (err) {
+    return handleMusicError(res, err, 'Lỗi tìm kiếm nhạc');
+  }
+}
+

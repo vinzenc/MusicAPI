@@ -74,19 +74,48 @@ export async function initSongsSchema() {
 }
 
 // Lay danh sach bai hat, cho phep loc theo trang thai duyet.
-export async function getSongs({ status } = {}) {
+export async function getSongs({ search = '', status = 'approved', page = 1, limit = 20 } = {}) {
   const db = getPoolOrThrow()
-  const hasFilter = status && ['pending', 'approved', 'rejected'].includes(String(status).toLowerCase())
+  let whereClause = '1=1'
+  const params = []
 
-  if (hasFilter) {
-    const [rows] = await db.execute('SELECT * FROM songs WHERE approvalStatus = ? ORDER BY id DESC', [
-      String(status).toLowerCase(),
-    ])
-    return rows
+  // 1. Lọc theo trạng thái (Mặc định cho danh sách public là lấy nhạc đã 'approved')
+  if (status) {
+    whereClause += ' AND approvalStatus = ?'
+    params.push(String(status).toLowerCase())
   }
 
-  const [rows] = await db.execute('SELECT * FROM songs ORDER BY id DESC')
-  return rows
+  // 2. Lọc theo từ khóa tìm kiếm (Tên bài, Ca sĩ, Album)
+  if (search) {
+    whereClause += ' AND (title LIKE ? OR artist LIKE ? OR album LIKE ?)'
+    const s = `%${search}%`
+    params.push(s, s, s)
+  }
+
+  // 3. Tính toán phân trang
+  const limitNum = parseInt(limit) || 20;
+  const offset = ((parseInt(page) || 1) - 1) * limitNum;
+  
+  // Đẩy limit và offset vào mảng params
+  params.push(limitNum, offset);
+
+  // Lấy dữ liệu bài hát
+  const [rows] = await db.execute(
+    `SELECT * FROM songs WHERE ${whereClause} ORDER BY id DESC LIMIT ? OFFSET ?`, 
+    params
+  );
+
+  // Lấy tổng số lượng để Frontend làm phân trang
+  const countParams = params.slice(0, -2); // Bỏ 2 tham số limit và offset ở cuối
+  const [countResult] = await db.execute(
+    `SELECT COUNT(*) as total FROM songs WHERE ${whereClause}`, 
+    countParams
+  );
+
+  return {
+    rows,
+    total: countResult[0].total
+  }
 }
 
 // Lay thong tin mot bai hat theo id.

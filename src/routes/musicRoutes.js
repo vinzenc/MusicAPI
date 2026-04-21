@@ -12,6 +12,11 @@ import {
   updateSongMultipart,
   uploadAudioOnly,
   uploadCoverOnly,
+  getMusicList,
+  searchMusic,
+  getSearchHistory, 
+  clearSearchHistory, 
+  deleteHistoryItem
 } from '../controllers/musicController.js'
 import { requireModeratorRole } from '../middlewares/moderationMiddleware.js'
 import { verifyToken } from '../middlewares/authMiddleware.js'
@@ -34,5 +39,18 @@ router.post('/songs/upload-cover', uploadCover.single('cover'), uploadCoverOnly)
 
 router.patch('/songs/:id/review', verifyToken, requireModeratorRole, reviewSongByModerator)
 router.post('/songs/:id/like', likeSong)
+
+// Các route cho List và Search (Không cần đăng nhập)
+router.get('/list', getMusicList);
+router.get('/search', searchMusic);
+
+//router lay lich su tim kiem
+router.get('/history', getSearchHistory); 
+router.delete('/history', clearSearchHistory);
+
+router.delete('/history/:keyword', deleteHistoryItem);
+
+
+
 
 export default router
