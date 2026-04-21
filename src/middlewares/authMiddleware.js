@@ -2,7 +2,6 @@ import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'jwt_secet_key_musicapp';
 
-// Xac thuc JWT token tu Authorization header va gan thong tin user vao req.
 export const verifyToken=(req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1];
 
@@ -25,7 +24,6 @@ export const verifyToken=(req, res, next) => {
     }
 };
 
-// Middleware phan quyen theo danh sach role duoc phep truy cap route.
 export const checkRole = (roles) =>{
     return (req,res,next) => {
         if(!roles.includes(req.user.role)) {
@@ -36,4 +34,4 @@ export const checkRole = (roles) =>{
         }
         next();
     };
-};
+}
