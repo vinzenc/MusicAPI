@@ -78,24 +78,20 @@ export async function getSongs({ search = '', status = 'approved', page = 1, lim
     params.push(s, s, s)
   }
 
-  // 3. Tính toán phân trang
+  // Tính toán phân trang
   const limitNum = parseInt(limit) || 20;
   const offset = ((parseInt(page) || 1) - 1) * limitNum;
-  
-  // Đẩy limit và offset vào mảng params
-  params.push(limitNum, offset);
 
   // Lấy dữ liệu bài hát
   const [rows] = await db.execute(
-    `SELECT * FROM songs WHERE ${whereClause} ORDER BY id DESC LIMIT ? OFFSET ?`, 
+    `SELECT * FROM songs WHERE ${whereClause} ORDER BY id DESC LIMIT ${limitNum} OFFSET ${offset}`, 
     params
   );
 
   // Lấy tổng số lượng để Frontend làm phân trang
-  const countParams = params.slice(0, -2); // Bỏ 2 tham số limit và offset ở cuối
   const [countResult] = await db.execute(
     `SELECT COUNT(*) as total FROM songs WHERE ${whereClause}`, 
-    countParams
+    params
   );
 
   return {
