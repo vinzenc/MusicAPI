@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors'; 
 import userRoutes from './src/routes/userRoutes.js';
 import authRoutes from './src/routes/authRouters.js';
+import favoriteRouters from './src/routes/favoriteRouters.js';
 import musicRoutes from './src/routes/musicRoutes.js';
 import profileRoutes from './src/routes/profileRoutes.js';
 import { uploadErrorMiddleware } from './src/middlewares/uploadErrorMiddleware.js';
@@ -34,6 +35,7 @@ app.get('/', (req, res) => {
 // ── API routes
 app.use('/users', userRoutes);
 app.use('/auth', authRoutes);
+app.use('/favorite',favoriteRouters);
 app.use('/music', musicRoutes);
 app.use('/api', musicRoutes);
 app.use('/profile', profileRoutes);
