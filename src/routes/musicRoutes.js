@@ -5,7 +5,6 @@ import {
   getAllSongs,
   getSingleSong,
   listenSong,
-  likeSong,
   removeSong,
   reviewSongByModerator,
   updateSongJson,
@@ -38,7 +37,7 @@ router.post('/songs/upload', uploadAudio.single('audio'), uploadAudioOnly)
 router.post('/songs/upload-cover', uploadCover.single('cover'), uploadCoverOnly)
 
 router.patch('/songs/:id/review', verifyToken, requireModeratorRole, reviewSongByModerator)
-router.post('/songs/:id/like', likeSong)
+
 
 // Các route cho List và Search (Không cần đăng nhập)
 router.get('/list', getMusicList);
