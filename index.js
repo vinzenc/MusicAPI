@@ -33,7 +33,7 @@ app.get('/', (req, res) => {
 });
 
 // ── API routes
-app.use('/users', userRoutes);
+app.use('/admin/users', adminRoutes);
 app.use('/auth', authRoutes);
 app.use('/favorite',favoriteRouters);
 app.use('/api', musicRoutes);
