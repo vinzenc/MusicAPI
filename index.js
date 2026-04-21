@@ -33,10 +33,12 @@ app.get('/', (req, res) => {
 });
 
 // ── API routes
-app.use('/admin/users', adminRoutes);
+app.use('/users', adminRoutes);       // frontend gọi /users/...
+app.use('/admin/users', adminRoutes); // backup route
 app.use('/auth', authRoutes);
-app.use('/favorite',favoriteRouters);
-app.use('/api', musicRoutes);
+app.use('/favorite', favoriteRouters);
+app.use('/music', musicRoutes);       // frontend gọi /music/...
+app.use('/api', musicRoutes);         // alias /api/...
 app.use('/profile', profileRoutes);
 app.use(uploadErrorMiddleware);
 
