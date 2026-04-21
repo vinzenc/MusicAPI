@@ -52,7 +52,7 @@ export const login = async (req,res) => {
             });
             console.log("Lỗi đăng nhập: Mật khẩu không đúng");
         }
-        const token = await jwt.sign({id: user.id}, JWT_SECRET, {expiresIn: '1h'});
+        const token = await jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, {expiresIn: '1h'});
         res.status(200).json({
             success: true,
             message: "Đăng nhập thành công",
