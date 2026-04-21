@@ -94,6 +94,8 @@ export const updateOwnPassword = async (req, res) => {
     }
 
     // Lấy thông tin cá nhân của người dùng hiện tại
+
+};
 export const getProfile = async (req, res) => {
     try {
         // req.user.id lấy từ verifyToken middleware
@@ -114,5 +116,4 @@ export const getProfile = async (req, res) => {
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
-};
 };

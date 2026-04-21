@@ -41,17 +41,8 @@ app.use('/profile', profileRoutes);
 app.use(uploadErrorMiddleware);
 
 // Server chạy backend
-async function startServer() {
-    try {
-        await bootstrapMusicSchema();
-        console.log('✅ Music schema ready');
-    } catch (error) {
-        console.warn('⚠️  Khong the bootstrap schema music:', error.message);
-    }
+app.listen(PORT, () => {
+    console.log(`Server đang chạy tại http://localhost:${PORT}`);
+});
 
-    app.listen(PORT, () => {
-        console.log(`Server đang chạy tại http://localhost:${PORT}`);
-    });
-}
 
-startServer();
