@@ -92,4 +92,27 @@ export const updateOwnPassword = async (req, res) => {
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
+
+    // Lấy thông tin cá nhân của người dùng hiện tại
+export const getProfile = async (req, res) => {
+    try {
+        // req.user.id lấy từ verifyToken middleware
+        const id = req.user.id; 
+        const user = await UserModel.getUserById(id);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "Không tìm thấy người dùng!"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: user
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
 };
