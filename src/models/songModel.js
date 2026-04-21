@@ -27,7 +27,7 @@ async function ensureColumnExists(columnName, definition) {
   }
 }
 
-// Khoi tao schema phuc vu CRUD, duyet va like bai hat.
+// Khoi tao schema phuc vu CRUD va duyet bai hat.
 export async function initSongsSchema() {
   // B1: Neu DB chua san sang thi bo qua khoi tao schema.
   if (!pool || typeof pool.execute !== 'function') return
@@ -49,8 +49,7 @@ export async function initSongsSchema() {
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
       approvalStatus VARCHAR(20) DEFAULT 'pending',
       reviewedByRole VARCHAR(20) DEFAULT NULL,
-      reviewedAt DATETIME DEFAULT NULL,
-      likeCount INT DEFAULT 0
+      reviewedAt DATETIME DEFAULT NULL
     )
   `)
 
@@ -58,19 +57,6 @@ export async function initSongsSchema() {
   await ensureColumnExists('approvalStatus', "VARCHAR(20) DEFAULT 'pending'")
   await ensureColumnExists('reviewedByRole', 'VARCHAR(20) DEFAULT NULL')
   await ensureColumnExists('reviewedAt', 'DATETIME DEFAULT NULL')
-  await ensureColumnExists('likeCount', 'INT DEFAULT 0')
-
-  // B4: Tao bang song_likes de rang buoc moi user like mot lan.
-  await db.execute(`
-    CREATE TABLE IF NOT EXISTS song_likes (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      songId INT NOT NULL,
-      likedBy VARCHAR(255) NOT NULL,
-      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE KEY unique_like (songId, likedBy),
-      CONSTRAINT fk_song_likes_song FOREIGN KEY (songId) REFERENCES songs(id) ON DELETE CASCADE
-    )
-  `)
 }
 
 // Lay danh sach bai hat, cho phep loc theo trang thai duyet.
@@ -130,7 +116,7 @@ export async function createSong(payload) {
   // Ghi ban ghi bai hat moi vao bang songs.
   const db = getPoolOrThrow()
   const [result] = await db.execute(
-    'INSERT INTO songs (title, artist, album, genre, duration, releaseYear, audioUrl, coverUrl, cloudinaryId, approvalStatus, reviewedByRole, reviewedAt, likeCount) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)',
+    'INSERT INTO songs (title, artist, album, genre, duration, releaseYear, audioUrl, coverUrl, cloudinaryId, approvalStatus, reviewedByRole, reviewedAt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
     [
       payload.title,
       payload.artist,
@@ -144,7 +130,6 @@ export async function createSong(payload) {
       payload.approvalStatus,
       payload.reviewedByRole,
       payload.reviewedAt,
-      payload.likeCount,
     ],
   )
 
@@ -195,23 +180,4 @@ export async function reviewSong(id, approvalStatus, reviewedByRole) {
   )
 
   return result.affectedRows
-}
-
-// Moi nguoi dung chi like mot lan tren moi bai hat.
-export async function likeSongOnce(songId, likedBy) {
-  const db = getPoolOrThrow()
-  try {
-    // B1: Chen ban ghi like de dam bao tinh duy nhat.
-    await db.execute('INSERT INTO song_likes (songId, likedBy) VALUES (?, ?)', [songId, likedBy])
-
-    // B2: Tang dem like trong bang songs.
-    await db.execute('UPDATE songs SET likeCount = likeCount + 1 WHERE id = ?', [songId])
-    return { liked: true }
-  } catch (err) {
-    // B3: Neu trung khoa unique => user da like truoc do.
-    if (String(err?.code) === 'ER_DUP_ENTRY') {
-      return { liked: false, message: 'Ban da like bai hat nay roi' }
-    }
-    throw err
-  }
 }

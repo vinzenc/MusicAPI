@@ -6,7 +6,6 @@ import {
   deleteSong,
   getSongById,
   getSongs,
-  likeSongOnce,
   reviewSong,
   updateSong,
 } from '../models/songModel.js'
@@ -24,13 +23,6 @@ function normalizeDuration(value) {
   if (value === undefined || value === null || value === '') return 0
   const parsed = Number(value)
   return Number.isFinite(parsed) ? Math.max(0, Math.round(parsed)) : NaN
-}
-
-// Xac dinh danh tinh like theo uu tien token -> header -> ip.
-function resolveLikedBy(req) {
-  if (req.user?.id) return `user:${req.user.id}`
-  if (req.headers['x-user-id']) return `header:${req.headers['x-user-id']}`
-  return `ip:${req.ip}`
 }
 
 // Kiem tra cac truong bat buoc cho bai hat.
@@ -138,7 +130,6 @@ export async function createSongJson(req, res) {
       approvalStatus: 'pending',
       reviewedByRole: null,
       reviewedAt: null,
-      likeCount: 0,
     })
 
     const song = await getSongById(songId)
@@ -226,7 +217,6 @@ export async function createSongMultipart(req, res) {
       approvalStatus: 'pending',
       reviewedByRole: null,
       reviewedAt: null,
-      likeCount: 0,
     })
 
     const song = await getSongById(songId)
@@ -353,30 +343,6 @@ export async function reviewSongByModerator(req, res) {
     return res.json({ message: 'Duyet nhac thanh cong', data: song })
   } catch (err) {
     return handleMusicError(res, err, 'Loi duyet nhac')
-  }
-}
-
-// Like bai hat: moi user chi duoc like 1 lan.
-export async function likeSong(req, res) {
-  try {
-    // B1: Kiem tra bai hat ton tai.
-    const song = await getSongById(req.params.id)
-    if (!song) return res.status(404).json({ message: 'Khong tim thay bai hat' })
-
-    // B2: Like theo user/ip va cap nhat so luot like.
-    const likedBy = resolveLikedBy(req)
-    const result = await likeSongOnce(req.params.id, likedBy)
-    const updatedSong = await getSongById(req.params.id)
-
-    // B3: Tra ve 409 neu da like truoc do.
-    if (!result.liked) {
-      return res.status(409).json({ message: result.message, data: updatedSong })
-    }
-
-    // B4: Tra ve bai hat sau khi tang like thanh cong.
-    return res.json({ message: 'Like thanh cong', data: updatedSong })
-  } catch (err) {
-    return handleMusicError(res, err, 'Loi like bai hat')
   }
 }
 

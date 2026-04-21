@@ -70,7 +70,7 @@ node migrate.js user.sql
 node migrate.js search_history.sql
 ```
 
-### 4.2 Bang songs va song_likes
+### 4.2 Bang songs
 
 Khong can migration rieng. Server tu tao khi khoi dong thong qua bootstrap schema.
 
@@ -132,7 +132,6 @@ Authorization: Bearer <JWT_TOKEN>
 - `POST /music/songs/upload`
 - `POST /music/songs/upload-cover`
 - `PATCH /music/songs/:id/review`
-- `POST /music/songs/:id/like`
 
 ### 7.3 User (Admin only)
 
@@ -277,7 +276,7 @@ Mong doi: `201`, response co `audioUrl`, `coverUrl`, `cloudinaryId`.
 - `POST {{base_url}}/music/songs/upload` (form-data key: `audio`)
 - `POST {{base_url}}/music/songs/upload-cover` (form-data key: `cover`)
 
-### 8.6 Review va like
+### 8.6 Review bai hat
 
 #### A. Review bai hat
 
@@ -292,13 +291,6 @@ Mong doi: `201`, response co `audioUrl`, `coverUrl`, `cloudinaryId`.
 ```
 
 Mong doi: `200`, `approvalStatus` doi thanh `approved`.
-
-#### B. Like bai hat
-
-- Request: `POST {{base_url}}/music/songs/:id/like`
-
-Mong doi lan 1: `200`.
-Mong doi lan 2 cung user/ip: `409` (da like truoc do).
 
 ### 8.7 Xoa bai hat
 
