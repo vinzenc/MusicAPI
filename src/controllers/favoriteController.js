@@ -42,7 +42,8 @@ export const favoriteSong = async (req, res) => {
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: "Lỗi hệ thống xử lý favorite"
+            message: "Lỗi hệ thống xử lý favorite",
+            error: error
         });
         console.log("Lỗi Favorite Song", error);
     }
