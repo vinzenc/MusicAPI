@@ -343,14 +343,7 @@ export async function reviewSongByModerator(req, res) {
   }
 
   try {
-    // B2: Neu tu choi -> Xoa luon khoi DB de tranh "rac".
-    if (status === 'rejected') {
-      const affectedRows = await removeSong(req.params.id)
-      if (!affectedRows) return res.status(404).json({ message: 'Khong tim thay bai hat de xoa' })
-      return res.json({ message: 'Da tu choi va xoa bai hat thanh cong' })
-    }
-
-    // B2 (Tiep): Neu duyet -> Ghi ket qua vao DB.
+    // B2: Ghi ket qua duyet vao DB (approved/rejected).
     const affectedRows = await reviewSong(req.params.id, status, req.moderatorRole)
     if (!affectedRows) return res.status(404).json({ message: 'Khong tim thay bai hat' })
 
