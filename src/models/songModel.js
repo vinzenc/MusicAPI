@@ -90,11 +90,15 @@ export async function getSongs({ search = '', status = null, page = 1, limit = 2
   const limitNum = parseInt(limit) || 20;
   const offset = ((parseInt(page) || 1) - 1) * limitNum;
 
-  // Lấy dữ liệu bài hát
-  const [rows] = await db.execute(
-    `SELECT * FROM songs WHERE ${whereClause} ORDER BY id DESC LIMIT ${limitNum} OFFSET ${offset}`, 
-    params
-  );
+  // Lấy dữ liệu bài hát (kèm tên người đăng)
+  const query = `SELECT s.*, u.name as uploaderName 
+     FROM songs s
+     LEFT JOIN users u ON s.uploaderId = u.id
+     WHERE ${whereClause} 
+     ORDER BY s.id DESC 
+     LIMIT ${limitNum} OFFSET ${offset}`;
+  
+  const [rows] = await db.execute(query, params);
 
   // Lấy tổng số lượng để Frontend làm phân trang
   const [countResult] = await db.execute(
