@@ -3,7 +3,7 @@ import pool from "../config/db.js";
 export const checkFavorite = async (userId, songId) => {
     const query = "SELECT * FROM favorite_songs WHERE user_id = ? AND song_id =?"
     const [result] = await pool.query(query,[userId, songId]);
-    return result > 0
+    return result.length > 0
 };
 
 export const addFavorite = async (userId, songId) => {
