@@ -9,7 +9,7 @@ import { verifyToken } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 router.use(verifyToken);
-router.post('/', addPlaylist);
+router.post('/add', addPlaylist);
 router.get('/:playlistId/songs', getPlaylistSongs);
 router.post('/:playlistId/songs', addSongToPlaylists);
 router.delete('/:playlistId', removePlaylist);
