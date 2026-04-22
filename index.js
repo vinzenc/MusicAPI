@@ -9,6 +9,7 @@ import profileRoutes from './src/routes/profileRoutes.js';
 import { uploadErrorMiddleware } from './src/middlewares/uploadErrorMiddleware.js';
 import { pingDatabase } from './src/utils/dbHealth.js';
 import { bootstrapMusicSchema } from './src/bootstrap/musicBootstrap.js';
+import playlistRoutes from "./src/routes/playlistRoutes.js"
 
 dotenv.config();
 const app = express();
@@ -38,6 +39,7 @@ app.use('/auth', authRoutes);
 app.use('/favorite', favoriteRouters);
 app.use('/music', musicRoutes);       // frontend gọi /music/...
 app.use('/profile', profileRoutes);
+app.use('/playlist',playlistRoutes);
 app.use(uploadErrorMiddleware);
 
 // Server chạy backend
